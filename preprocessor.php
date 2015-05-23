@@ -1,17 +1,20 @@
 <?php
 
 $inputFile = '[ file name here]';
-$outDir = '[ output dir here]';
+$outDir = '[ output dir here ]';
 
-//////////////////
+// Do not change anything below this line
+// --------------------------------------
 
 $start = microtime ();
 
-
+# Function to display errors
 function exc($t,$l='') { exit ('<b>Compilation error:</b> '. $t .($l!=''?' (on line '.$l.')':'')); }
 
+# Grab schema
 $input = file_get_contents ($inputFile);
 
+# Define some variables
 $scope = '';
 $ns = '';
 $qjs = array ();
@@ -36,29 +39,34 @@ foreach (StringUtils::splitByLine ($input) as $lnum => $line) {
 		if ($line [0] == '/') {
 			$ns = str_replace (array ('/', '\\'), '.', substr ($line, 1));
 		}
+		
 		# Class
 		elseif ($line [0] == 'C') {
 			# Pointermove
 			if ($scope != '')
 				$qjs [$curr->name] = $curr;
 			
+			# Define new class
 			$scope = 'class';
 			$curr = new QJClass;
 			$curr->name = trim (StringUtils::untilFirst (':', $d));
 			$curr->ns = $ns;
 		}
+		
 		# Interface
 		elseif ($line [0] == 'I') {
 			# Pointermove
 			if ($scope != '')
 				$qjs [$curr->name] = $curr;
-
+			
+			# Define new interface
 			$scope = 'interface';
 			$curr = new QJInterface;
 			$curr->name = trim(StringUtils::untilFirst (':', $d));
 			$curr->extends += cln(trim(StringUtils::fromFirst (':', $d)));
 			$curr->ns = $ns;
 		}
+		
 		# Enum
 		elseif ($line [0] == 'E') {
 			# Pointermove
@@ -70,23 +78,30 @@ foreach (StringUtils::splitByLine ($input) as $lnum => $line) {
 			$curr->name = trim($d);
 			$curr->ns = $ns;
 		}
+		
 		# Methods / functions
 		elseif ($line [0] == 'F') {
+			# Must be inside a class, interface or enum
 			if ($scope == 'class' || $scope == 'interface' || $scope == 'enum')
 			{
+				# Define new method
 				$m = new QJMethod;
 				$m->name = trim(StringUtils::untilFirst ('(', $d));
 				$m->args ($d);
 				$m->result = trim(StringUtils::fromLast (':', $d));
 				$m->static = $static;
 				$m->master = $curr->name;
+				
+				# Add method to the current thing
 				$curr->methods [] = $m;
 			}
 			else
 				exc('Methods can only be in classes or interfaces', $lnum); 
 		}
+		
 		# Property
 		elseif ($line [0] == 'P') {
+			# Must be inside a class or enum
 			if ($scope == 'class' || $scope == 'enum')
 			{
 				$curr->properties [trim(StringUtils::untilFirst (':', $d))] = StringUtils::fromFirst (':', $d);
@@ -94,8 +109,11 @@ foreach (StringUtils::splitByLine ($input) as $lnum => $line) {
 			else
 				exc ('Cannot define a property outside a class', $lnum);
 		}
+		
+		# Enum constant
 		elseif ($line [0] == '-')
 		{
+			# Must be inside an enum
 			if ($scope == 'enum')
 				$curr->defs [] = trim ($d);
 			else
@@ -107,23 +125,26 @@ foreach (StringUtils::splitByLine ($input) as $lnum => $line) {
 	}
 }
 
-if(!is_dir($outDir))mkdir($outDir);
-
+# Debug log
 echo '<pre>';
-
 foreach ($qjs as $qj)
 {
+	# Get the path for this class/interface/enum/whevver
+	# and make the directory if it does not exist yet.
 	$ddir = $outDir .DIRECTORY_SEPARATOR. str_replace('.', DIRECTORY_SEPARATOR, $qj->ns);
-	if (!is_dir ($ddir)) mkdir ($ddir, 0777, true);
-	file_put_contents ($ddir .DIRECTORY_SEPARATOR. $qj->name .'.java', (string) $qj);
-	echo 'Created file: '. $qj->name .'.java' . PHP_EOL;
+	if (!is_dir ($ddir))
+		mkdir ($ddir, 0777, true);
+	
+	# Save the generated Java code
+	if (file_put_contents ($ddir . DIRECTORY_SEPARATOR . $qj->name .'.java', (string) $qj))
+		echo 'Created file: '. $qj->name .'.java' . PHP_EOL;
+	else
+		echo 'Could not create file: '. $qj->name .'.java' . PHP_EOL;
 }
+echo '</pre>' . PHP_EOL . 'Finished in <b>'. (microtime () - $start) .'</b> seconds';
 
-echo '</pre>';
-
-echo 'Finished in <b>'. (microtime () - $start) .'</b> seconds';
-
-///////////////
+// Language elements: change output here
+// -------------------------------------
 
 class QJInterface {
 	public $name;
@@ -149,7 +170,7 @@ class QJInterface {
 	}
 }
 
-class QJClass extends QJInterface {
+class QJClass {
 	public $name;
 	public $methods = array ();
 	public $ns = '';
