@@ -29,7 +29,7 @@ foreach ($lines as $lnum => $line) {
 	$lnum += 1;
 
 	# No empty lines or comments
-	if ($line != '' && $line [0] != '#') {
+	if (strlen ($line) > 3 && $line [0] != '#') {
 		# Static modifier
 		$static = $line [0] == '$';
 		if ($static)
@@ -108,6 +108,7 @@ foreach ($lines as $lnum => $line) {
 				if ($len > 4)
 					if ($m->return [0] == '{' && $m->return [$len - 1] == '}')
 						$m->return = 'HashMap<'.substr($m->return, 1, -1).'>';
+				$curr->imports [] = 'java.util.HashMap';
 				
 				$m->static = $static;
 				$m->master = $curr->name;
@@ -126,6 +127,8 @@ foreach ($lines as $lnum => $line) {
 			{
 				$type = trim (StringUtils::fromFirst (':', $d));
 				$len = strlen($type);
+				
+				# {Hash, Map}-parsing
 				if ($len > 4)
 					if ($type [0] == '{' && $type [$len - 1] == '}')
 						$type = 'HashMap<'.substr($type, 1, -1).'>';
@@ -183,11 +186,17 @@ class QJInterface {
 	public $methods = array ();
 	public $ns = '';
 	public $extends = array ();
+	public $imports = array ();
 
 	public function __toString () {
 		$out = '';
 		if ($this->ns != '')
 			$out .= 'package '. $this->ns .';'.PHP_EOL.PHP_EOL;
+		
+		foreach ($this->imports as $import)
+			$out .= 'import '.$import.';';
+		
+		
 		$out .= 'interface '. $this->name;
 		$out .=
 			count($this->extends) > 0
@@ -209,11 +218,15 @@ class QJClass {
 	public $extends = '';
 	public $properties = array ();
 	public $implements = array ();
+	public $imports = array ();
 
 	public function __toString () {
 		$out = '';
 		if ($this->ns != '')
 			$out .= 'package '. $this->ns .';'.PHP_EOL.PHP_EOL;
+		
+		foreach ($this->imports as $import)
+			$out .= 'import '.$import.';';
 		
 		$out .= 'class '. $this->name;
 		$out .= ($this->extends != ''
@@ -244,7 +257,10 @@ class QJEnum extends QJCLass {
 		$out = '';
 		if ($this->ns != '')
 			$out .= 'package '. $this->ns .';'.PHP_EOL.PHP_EOL;
-
+		
+		foreach ($this->imports as $import)
+			$out .= 'import '.$import.';';
+		
 		$out .= 'enum '. $this->name .' {'.PHP_EOL;
 		
 		# Enum constants
