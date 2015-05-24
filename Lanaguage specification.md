@@ -1,4 +1,5 @@
 Classes:
+
     /com/example/tutorial/package
     C ClassName : ExtendingClass, ImplementingClass, ImplementingClass, ...
       $P StaticProperty: String
@@ -8,6 +9,7 @@ Classes:
       F dispose (): void
 
 Interfaces:
+
     I InterfaceName : ExtendingInferface, ExtendingInterface, ...
       F getName (): String
       F getColour (): Colour
@@ -15,6 +17,7 @@ Interfaces:
       F setColour (Colour colour): void
 
 Enums:
+
     E Colour
       - RED (0)
       - BLUE (1)
