@@ -1,7 +1,7 @@
 Classes:
 
     /com/example/tutorial/package
-    C ClassName : ExtendingClass, ImplementingClass, ImplementingClass, ...
+    C ClassName = ExtendingClass : ImplementingClass, ImplementingClass, ...
       $P StaticProperty: String
       P NormalProperty: int
       
