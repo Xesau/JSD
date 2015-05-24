@@ -108,7 +108,7 @@ foreach ($lines as $lnum => $line) {
 				if ($len > 4)
 					if ($m->return [0] == '{' && $m->return [$len - 1] == '}')
 						$m->return = 'HashMap<'.substr($m->return, 1, -1).'>';
-				$curr->imports [] = 'java.util.HashMap';
+				$curr->imports ['java.util.HashMap'] = null;
 				
 				$m->static = $static;
 				$m->master = $curr->name;
@@ -132,6 +132,7 @@ foreach ($lines as $lnum => $line) {
 				if ($len > 4)
 					if ($type [0] == '{' && $type [$len - 1] == '}')
 						$type = 'HashMap<'.substr($type, 1, -1).'>';
+				$curr->imports ['java.util.HashMap'] = null;
 				
 				$name = trim(StringUtils::untilFirst (':', $d));
 				
@@ -193,7 +194,7 @@ class QJInterface {
 		if ($this->ns != '')
 			$out .= 'package '. $this->ns .';'.PHP_EOL.PHP_EOL;
 		
-		foreach ($this->imports as $import)
+		foreach ($this->imports as $import => $n)
 			$out .= 'import '.$import.';';
 		
 		
@@ -225,7 +226,7 @@ class QJClass {
 		if ($this->ns != '')
 			$out .= 'package '. $this->ns .';'.PHP_EOL.PHP_EOL;
 		
-		foreach ($this->imports as $import)
+		foreach ($this->imports as $import => $n)
 			$out .= 'import '.$import.';';
 		
 		$out .= 'class '. $this->name;
@@ -258,8 +259,8 @@ class QJEnum extends QJCLass {
 		if ($this->ns != '')
 			$out .= 'package '. $this->ns .';'.PHP_EOL.PHP_EOL;
 		
-		foreach ($this->imports as $import)
-			$out .= 'import '.$import.';';
+		foreach ($this->imports as $import => $n)
+			$out .= 'import '.$import.';' . PHP_EOL;
 		
 		$out .= 'enum '. $this->name .' {'.PHP_EOL;
 		
