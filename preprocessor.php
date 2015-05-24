@@ -195,7 +195,7 @@ class QJInterface {
 			$out .= 'package '. $this->ns .';'.PHP_EOL.PHP_EOL;
 		
 		foreach ($this->imports as $import => $n)
-			$out .= 'import '.$import.';';
+			$out .= 'import '.$import.';' . PHP_EOL;
 		
 		
 		$out .= 'interface '. $this->name;
@@ -227,7 +227,7 @@ class QJClass {
 			$out .= 'package '. $this->ns .';'.PHP_EOL.PHP_EOL;
 		
 		foreach ($this->imports as $import => $n)
-			$out .= 'import '.$import.';';
+			$out .= 'import '.$import.'; . PHP_EOL;
 		
 		$out .= 'class '. $this->name;
 		$out .= ($this->extends != ''
